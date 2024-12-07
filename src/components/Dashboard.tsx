@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { Calendar } from './Calendar/Calendar';
 import { TaskList } from './Tasks/TaskList';
 import { NoteEditor } from './Notes/NoteEditor';
-import { Task, Note } from '../types';
+import { NoteList } from './Notes/NoteList';
+import { Task } from '../types';
 import { notificationService } from '../services/NotificationService';
 import { useAutoCalendarSetup } from '../hooks/useAutoCalendarSetup';
 import { useTaskManager } from '../hooks/useTaskManager';
+import { useNoteManager } from '../hooks/useNoteManager';
 
 export function Dashboard() {
   const { tasks, addTask, toggleTask, deleteTask } = useTaskManager();
-  const [notes, setNotes] = useState<Note[]>([]);
+  const { notes, addNote, deleteNote } = useNoteManager();
   const [isAddingNote, setIsAddingNote] = useState(false);
 
   // Auto-setup calendar when logged in
@@ -26,16 +28,7 @@ export function Dashboard() {
   };
 
   const handleSaveNote = (title: string, content: string) => {
-    const newNote: Note = {
-      id: Date.now().toString(),
-      title,
-      content,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      extractedTasks: [],
-      extractedEvents: [],
-    };
-    setNotes([...notes, newNote]);
+    addNote(title, content);
     setIsAddingNote(false);
   };
 
@@ -51,19 +44,18 @@ export function Dashboard() {
             onDeleteTask={deleteTask}
           />
         </div>
-        <div>
+        <div className="space-y-8">
           {isAddingNote ? (
             <NoteEditor
               onSave={handleSaveNote}
               onClose={() => setIsAddingNote(false)}
             />
           ) : (
-            <button
-              onClick={() => setIsAddingNote(true)}
-              className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-colors"
-            >
-              Add a new note
-            </button>
+            <NoteList
+              notes={notes}
+              onAddNote={() => setIsAddingNote(true)}
+              onDeleteNote={deleteNote}
+            />
           )}
         </div>
       </div>
