@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Calendar } from 'lucide-react';
 
 export function LoginPage() {
   const { login } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async () => {
+    try {
+      setError(null);
+      await login();
+    } catch (err) {
+      setError('Failed to sign in with Google. Please try again.');
+      console.error('Login error:', err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -16,8 +27,14 @@ export function LoginPage() {
           <p className="text-gray-600">Sign in to manage your tasks and calendar</p>
         </div>
 
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+
         <button
-          onClick={() => login()}
+          onClick={handleLogin}
           className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -28,6 +45,10 @@ export function LoginPage() {
           </svg>
           Sign in with Google
         </button>
+
+        <p className="mt-4 text-sm text-gray-500 text-center">
+          Make sure pop-ups are enabled for this site
+        </p>
       </div>
     </div>
   );

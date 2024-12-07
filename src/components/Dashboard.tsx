@@ -2,45 +2,27 @@ import React, { useState } from 'react';
 import { Calendar } from './Calendar/Calendar';
 import { TaskList } from './Tasks/TaskList';
 import { NoteEditor } from './Notes/NoteEditor';
-import { Event, Task, Note } from '../types';
+import { Task, Note } from '../types';
 import { notificationService } from '../services/NotificationService';
+import { useAutoCalendarSetup } from '../hooks/useAutoCalendarSetup';
+import { useTaskManager } from '../hooks/useTaskManager';
 
 export function Dashboard() {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const { tasks, addTask, toggleTask, deleteTask } = useTaskManager();
   const [notes, setNotes] = useState<Note[]>([]);
   const [isAddingNote, setIsAddingNote] = useState(false);
 
+  // Auto-setup calendar when logged in
+  useAutoCalendarSetup();
+
   React.useEffect(() => {
-    notificationService.startMonitoring(events, tasks);
+    notificationService.startMonitoring([], tasks);
     return () => notificationService.stopMonitoring();
-  }, [events, tasks]);
+  }, [tasks]);
 
   const handleAddEvent = () => {
-    const newEvent: Event = {
-      id: Date.now().toString(),
-      title: 'New Event',
-      startTime: new Date(),
-      endTime: new Date(Date.now() + 3600000),
-    };
-    setEvents([...events, newEvent]);
-  };
-
-  const handleAddTask = () => {
-    const newTask: Task = {
-      id: Date.now().toString(),
-      title: 'New Task',
-      deadline: new Date(Date.now() + 86400000),
-      completed: false,
-      priority: 'medium',
-    };
-    setTasks([...tasks, newTask]);
-  };
-
-  const handleToggleTask = (taskId: string) => {
-    setTasks(tasks.map(task =>
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
+    // This will be implemented when we add event creation functionality
+    console.log('Add event clicked');
   };
 
   const handleSaveNote = (title: string, content: string) => {
@@ -61,11 +43,12 @@ export function Dashboard() {
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-8">
-          <Calendar events={events} onAddEvent={handleAddEvent} />
+          <Calendar onAddEvent={handleAddEvent} />
           <TaskList
             tasks={tasks}
-            onToggleTask={handleToggleTask}
-            onAddTask={handleAddTask}
+            onToggleTask={toggleTask}
+            onAddTask={addTask}
+            onDeleteTask={deleteTask}
           />
         </div>
         <div>

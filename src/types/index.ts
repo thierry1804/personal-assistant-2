@@ -5,6 +5,7 @@ export interface Task {
   deadline: Date;
   completed: boolean;
   priority: 'low' | 'medium' | 'high';
+  quadrant: 'urgent-important' | 'not-urgent-important' | 'urgent-not-important' | 'not-urgent-not-important';
 }
 
 export interface Event {

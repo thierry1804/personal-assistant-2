@@ -27,11 +27,12 @@ export function useGoogleCalendar() {
       }
     }
 
-    fetchEvents();
-    // Refresh events every 5 minutes
-    const intervalId = setInterval(fetchEvents, 5 * 60 * 1000);
-
-    return () => clearInterval(intervalId);
+    if (isAuthenticated) {
+      fetchEvents();
+      // Refresh events every 5 minutes
+      const intervalId = setInterval(fetchEvents, 5 * 60 * 1000);
+      return () => clearInterval(intervalId);
+    }
   }, [isAuthenticated, calendarConfig]);
 
   return { events, isLoading, error };

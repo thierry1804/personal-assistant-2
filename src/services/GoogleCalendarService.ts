@@ -1,5 +1,4 @@
 import { Event } from '../types';
-import { useGoogleAuth } from '../contexts/GoogleAuthContext';
 
 export class GoogleCalendarService {
   static async fetchEvents(): Promise<Event[]> {

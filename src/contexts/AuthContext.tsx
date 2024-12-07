@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useGoogleLogin, TokenResponse } from '@react-oauth/google';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { GOOGLE_CONFIG } from '../config/google';
 
 interface User {
@@ -12,7 +13,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: () => void;
+  login: () => Promise<void>;
   logout: () => void;
 }
 
@@ -21,8 +22,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const login = useGoogleLogin({
+  const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse: TokenResponse) => {
       try {
         const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
@@ -38,19 +41,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('googleAccessToken', tokenResponse.access_token);
+        
+        if (location.pathname === '/login') {
+          navigate('/', { replace: true });
+        }
       } catch (error) {
         console.error('Failed to fetch user info:', error);
+        throw error;
       }
     },
-    onError: () => {
-      console.error('Login Failed');
+    onError: (error) => {
+      console.error('Login Failed:', error);
+      throw error;
     },
     scope: GOOGLE_CONFIG.scopes.join(' '),
+    flow: GOOGLE_CONFIG.flowType,
   });
+
+  const login = async () => {
+    try {
+      await googleLogin();
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
+  };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('googleAccessToken');
+    navigate('/login', { replace: true });
   };
 
   useEffect(() => {
