@@ -23,7 +23,6 @@ export function Dashboard() {
   }, [tasks]);
 
   const handleAddEvent = () => {
-    // This will be implemented when we add event creation functionality
     console.log('Add event clicked');
   };
 
@@ -33,18 +32,15 @@ export function Dashboard() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="space-y-8">
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Calendar Section */}
+        <div className="lg:col-span-2">
           <Calendar onAddEvent={handleAddEvent} />
-          <TaskList
-            tasks={tasks}
-            onToggleTask={toggleTask}
-            onAddTask={addTask}
-            onDeleteTask={deleteTask}
-          />
         </div>
-        <div className="space-y-8">
+
+        {/* Notes Section */}
+        <div className="space-y-6">
           {isAddingNote ? (
             <NoteEditor
               onSave={handleSaveNote}
@@ -57,6 +53,16 @@ export function Dashboard() {
               onDeleteNote={deleteNote}
             />
           )}
+        </div>
+
+        {/* Tasks Section - Full Width */}
+        <div className="lg:col-span-3">
+          <TaskList
+            tasks={tasks}
+            onToggleTask={toggleTask}
+            onAddTask={addTask}
+            onDeleteTask={deleteTask}
+          />
         </div>
       </div>
     </div>

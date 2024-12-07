@@ -20,24 +20,38 @@ export function TaskList({ tasks, onToggleTask, onAddTask, onDeleteTask }: TaskL
     return acc;
   }, {} as Record<Task['quadrant'], Task[]>);
 
+  const quadrantColors = {
+    'urgent-important': 'border-red-200 bg-red-50',
+    'not-urgent-important': 'border-blue-200 bg-blue-50',
+    'urgent-not-important': 'border-yellow-200 bg-yellow-50',
+    'not-urgent-not-important': 'border-gray-200 bg-gray-50'
+  };
+
+  const quadrantTitles = {
+    'urgent-important': { text: 'Do', color: 'text-red-700' },
+    'not-urgent-important': { text: 'Plan', color: 'text-blue-700' },
+    'urgent-not-important': { text: 'Delegate', color: 'text-yellow-700' },
+    'not-urgent-not-important': { text: 'Eliminate', color: 'text-gray-700' }
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-white rounded-xl shadow-lg p-6">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <CheckCircle className="w-6 h-6 text-green-600" />
-          <h2 className="text-xl font-semibold">Tasks</h2>
+        <div className="flex items-center gap-3">
+          <CheckCircle className="w-7 h-7 text-green-600" />
+          <h2 className="text-2xl font-bold text-gray-900">Task Manager</h2>
         </div>
         <button
           onClick={() => setIsAddingTask(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-700 hover:to-green-600 transition-all shadow-md hover:shadow-lg"
         >
-          <Plus className="w-4 h-4" />
-          Add Task
+          <Plus className="w-5 h-5" />
+          New Task
         </button>
       </div>
 
-      {isAddingTask ? (
-        <div className="mb-6">
+      {isAddingTask && (
+        <div className="mb-8 p-6 border border-gray-200 rounded-lg bg-gray-50">
           <TaskForm
             onSubmit={(task) => {
               onAddTask(task);
@@ -46,60 +60,33 @@ export function TaskList({ tasks, onToggleTask, onAddTask, onDeleteTask }: TaskL
             onCancel={() => setIsAddingTask(false)}
           />
         </div>
-      ) : null}
+      )}
 
-      <div className="grid grid-cols-2 gap-4">
-        {/* Urgent & Important */}
-        <div className="space-y-2">
-          <h3 className="font-medium text-red-600">Urgent & Important</h3>
-          {tasksByQuadrant['urgent-important']?.map(task => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              onToggle={onToggleTask}
-              onDelete={onDeleteTask}
-            />
-          ))}
-        </div>
-
-        {/* Not Urgent & Important */}
-        <div className="space-y-2">
-          <h3 className="font-medium text-blue-600">Not Urgent & Important</h3>
-          {tasksByQuadrant['not-urgent-important']?.map(task => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              onToggle={onToggleTask}
-              onDelete={onDeleteTask}
-            />
-          ))}
-        </div>
-
-        {/* Urgent & Not Important */}
-        <div className="space-y-2">
-          <h3 className="font-medium text-yellow-600">Urgent & Not Important</h3>
-          {tasksByQuadrant['urgent-not-important']?.map(task => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              onToggle={onToggleTask}
-              onDelete={onDeleteTask}
-            />
-          ))}
-        </div>
-
-        {/* Not Urgent & Not Important */}
-        <div className="space-y-2">
-          <h3 className="font-medium text-gray-600">Not Urgent & Not Important</h3>
-          {tasksByQuadrant['not-urgent-not-important']?.map(task => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              onToggle={onToggleTask}
-              onDelete={onDeleteTask}
-            />
-          ))}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {Object.entries(quadrantTitles).map(([quadrant, { text, color }]) => (
+          <div
+            key={quadrant}
+            className={`p-4 rounded-lg border ${quadrantColors[quadrant as keyof typeof quadrantColors]}`}
+          >
+            <h3 className={`text-lg font-semibold mb-4 ${color}`}>
+              {text}
+            </h3>
+            <div className="space-y-3">
+              {tasksByQuadrant[quadrant as Task['quadrant']]?.map(task => (
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  onToggle={onToggleTask}
+                  onDelete={onDeleteTask}
+                />
+              )) || (
+                <p className="text-sm text-gray-500 text-center py-4">
+                  No tasks in this category
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
